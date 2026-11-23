@@ -12,10 +12,15 @@ const totalIncome = document.getElementById("totalIncome");
 const totalExpenses = document.getElementById("totalExpenses");
 const balance = document.getElementById("balance");
 
+const submitButton = transactionForm.querySelector('button[type="submit"]');
+const cancelButton = document.getElementById("cancelButton");
+
 
 // Transactions Array
 
 let transactions = [];
+
+let editingTransactionId = null;
 
 
 // Form Submission
@@ -34,16 +39,38 @@ transactionForm.addEventListener("submit", function(event) {
         return;
     }
 
-    const transaction = {
-        id: Date.now(),
-        title: title,
-        amount: amount,
-        type: type,
-        category: category,
-        date: new Date().toISOString().split("T")[0]
-    };
+    if (editingTransactionId !== null) {
 
-    transactions.push(transaction);
+        const existingTransaction = transactions.find(function(item) {
+            return item.id === editingTransactionId;
+        });
+
+        if (!existingTransaction) {
+            alert("Transaction not found!");
+            return;
+        }
+
+        existingTransaction.title = title;
+        existingTransaction.amount = amount;
+        existingTransaction.type = type;
+        existingTransaction.category = category;
+
+        editingTransactionId = null;
+
+    } else {
+
+        const transaction = {
+            id: Date.now(),
+            title: title,
+            amount: amount,
+            type: type,
+            category: category,
+            date: new Date().toISOString().split("T")[0]
+        };
+
+        transactions.push(transaction);
+
+    }
 
     saveTransactions();
 
@@ -52,6 +79,25 @@ transactionForm.addEventListener("submit", function(event) {
     updateSummary();
 
     transactionForm.reset();
+
+    submitButton.textContent = "Add Transaction";
+
+    cancelButton.hidden = true;
+
+});
+
+
+// Cancel Editing
+
+cancelButton.addEventListener("click", function() {
+
+    editingTransactionId = null;
+
+    transactionForm.reset();
+
+    submitButton.textContent = "Add Transaction";
+
+    cancelButton.hidden = true;
 
 });
 
@@ -68,6 +114,30 @@ function renderTransactions() {
 
         li.textContent = `${transaction.title} - Rs. ${transaction.amount} - ${transaction.type} - ${transaction.category}`;
 
+        // Edit Button
+
+        const editButton = document.createElement("button");
+
+        editButton.textContent = "Edit";
+
+        li.appendChild(editButton);
+
+        editButton.addEventListener("click", function() {
+
+            editingTransactionId = transaction.id;
+
+            titleInput.value = transaction.title;
+            amountInput.value = transaction.amount;
+            typeInput.value = transaction.type;
+            categoryInput.value = transaction.category;
+
+            submitButton.textContent = "Update Transaction";
+
+            cancelButton.hidden = false;
+
+        });
+
+
         // Delete Button
 
         const deleteButton = document.createElement("button");
@@ -79,6 +149,20 @@ function renderTransactions() {
             transactions = transactions.filter(function(item) {
                 return item.id !== transaction.id;
             });
+
+            // Reset editing if currently edited transaction is deleted
+
+            if (editingTransactionId === transaction.id) {
+
+                editingTransactionId = null;
+
+                transactionForm.reset();
+
+                submitButton.textContent = "Add Transaction";
+
+                cancelButton.hidden = true;
+
+            }
 
             saveTransactions();
 
