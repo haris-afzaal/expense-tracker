@@ -1,5 +1,5 @@
 
-// DOM Elements Selection
+ // DOM Elements Selection
 
 const transactionForm = document.getElementById("transactionForm");
 const titleInput = document.getElementById("title");
@@ -14,7 +14,8 @@ const balance = document.getElementById("balance");
 
 const submitButton = transactionForm.querySelector('button[type="submit"]');
 const cancelButton = document.getElementById("cancelButton");
-
+const filterType = document.getElementById("filterType");
+const searchInput = document.getElementById("searchInput");
 
 // Transactions Array
 
@@ -23,6 +24,17 @@ let transactions = [];
 let editingTransactionId = null;
 
 
+// Filter Change Event
+
+filterType.addEventListener("change", function() {
+    renderTransactions();
+});
+
+// Search Event
+
+searchInput.addEventListener("input", function() {
+    renderTransactions();
+});
 // Form Submission
 
 transactionForm.addEventListener("submit", function(event) {
@@ -38,6 +50,8 @@ transactionForm.addEventListener("submit", function(event) {
         alert("Please enter valid transaction details!");
         return;
     }
+
+    // Update Existing Transaction
 
     if (editingTransactionId !== null) {
 
@@ -58,6 +72,8 @@ transactionForm.addEventListener("submit", function(event) {
         editingTransactionId = null;
 
     } else {
+
+        // Add New Transaction
 
         const transaction = {
             id: Date.now(),
@@ -108,11 +124,34 @@ function renderTransactions() {
 
     transactionList.innerHTML = "";
 
-    transactions.forEach(function(transaction) {
+    // Filter Transactions
+
+    // Search and Filter Transactions
+
+const searchText = searchInput.value.toLowerCase().trim();
+
+let filteredTransactions = transactions.filter(function(transaction) {
+
+    const matchesSearch =
+    transaction.title.toLowerCase().includes(searchText) ||
+    transaction.category.toLowerCase().includes(searchText) ||
+    transaction.type.toLowerCase().includes(searchText);
+
+    const matchesFilter =
+        filterType.value === "all" ||
+        transaction.type === filterType.value;
+
+    return matchesSearch && matchesFilter;
+
+});
+
+    // Display Filtered Transactions
+
+    filteredTransactions.forEach(function(transaction) {
 
         const li = document.createElement("li");
 
-        li.textContent = `${transaction.title} - Rs. ${transaction.amount} - ${transaction.type} - ${transaction.category}`;
+        li.textContent = `${transaction.title} - Rs. ${transaction.amount} - ${transaction.type} - ${transaction.category} - ${new Date(transaction.date).toLocaleDateString("en-GB")}`;
 
         // Edit Button
 
@@ -150,7 +189,7 @@ function renderTransactions() {
                 return item.id !== transaction.id;
             });
 
-            // Reset editing if currently edited transaction is deleted
+            // Reset Editing if Deleted Transaction is Being Edited
 
             if (editingTransactionId === transaction.id) {
 

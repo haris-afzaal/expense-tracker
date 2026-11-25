@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <header>
@@ -55,7 +57,9 @@
                     <option value="other">Other</option>
                 </select>
 
-                <button type="submit">Add Transaction</button>
+                <button type="submit">
+                    Add Transaction
+                </button>
 
                 <button type="button" id="cancelButton" hidden>
                     Cancel Edit
@@ -66,6 +70,13 @@
 
         <section id="transactions">
             <h2>Transactions</h2>
+            <input type="text" id="searchInput" placeholder="Search transactions...">
+            <select id="filterType">
+                <option value="all">All Transactions</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+
             <ul id="transactionList"></ul>
         </section>
 
@@ -74,4 +85,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>
